@@ -91,8 +91,7 @@ abstract contract RateLimit {
     }
     allowed = rateLimitSettings.value;
     unchecked {
-      uint40 needle = uint40(block.timestamp) - rateLimitSettings.time;
-      (bool success, Timestamped storage found) = _history.bisect(needle);
+      (bool success, Timestamped storage found) = _history.bisect(uint40(block.timestamp) - rateLimitSettings.time);
       if (success) {
         allowed += found.value;
       }
