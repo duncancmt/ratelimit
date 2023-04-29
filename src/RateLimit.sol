@@ -100,6 +100,6 @@ abstract contract RateLimit {
     if (requested < allowed) {
       allowed = requested;
     }
-    rateLimitCurrent = Timestamped(uint40(block.timestamp), currentValue + allowed);
+    (rateLimitCurrent.time, rateLimitCurrent.value) = (uint40(block.timestamp), currentValue + allowed);
   }
 }
