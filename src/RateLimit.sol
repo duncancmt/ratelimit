@@ -81,7 +81,9 @@ abstract contract RateLimit {
   function history(uint40 time) public view returns (bool success, uint40 foundTime, uint216 foundValue) {
     Timestamped storage found;
     (success, found) = _history.bisect(time);
-    (foundTime, foundValue) = (found.time, found.value);
+    if (success) {
+      (foundTime, foundValue) = (found.time, found.value);
+    }
   }
 
   function _rateLimit(uint216 requested) internal returns (uint216 allowed) {
