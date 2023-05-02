@@ -33,6 +33,7 @@ contract RateLimitTest is Test {
   }
   function testRateLimit() external {
     vm.warp(_timestamp.get() + 365 days);
+    uint256 startTime = _timestamp.get();
     for (uint256 i; i < 10; i++) {
       assertEq(_rateLimit.rateLimit(1), 1, "got ratelimited too early");
       vm.warp(_timestamp.get() + 1 seconds);
@@ -42,7 +43,10 @@ contract RateLimitTest is Test {
     assertNotEq(time, 0);
     assertNotEq(value, 0);
     assertEq(_rateLimit.rateLimit(1), 0, "ratelimit not applied");
-    vm.warp(_timestamp.get() + 1 days + 1 seconds);
+    vm.warp(_timestamp.get() + 1 days - 11 seconds);
+    assertEq(_rateLimit.rateLimit(1), 0, "ratelimit not applied - edge case");
+    vm.warp(_timestamp.get() + 1 seconds);
     assertEq(_rateLimit.rateLimit(1), 1, "ratelimit did not expire");
+    assertEq(_timestamp.get(), startTime + 1 days);
   }
 }
