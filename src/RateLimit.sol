@@ -87,21 +87,21 @@ abstract contract RateLimit {
   }
 
   function _rateLimit(uint216 requested) internal returns (uint216 allowed) {
-    (uint40 currentTime, uint216 currentValue) = (rateLimitCurrent.time, rateLimitCurrent.value);
-    if (currentTime > 0 && currentTime < block.timestamp) {
-      _history.push(Timestamped(currentTime, currentValue));
-    }
-    allowed = rateLimitSettings.value;
     unchecked {
-      (bool success, Timestamped storage found) = _history.bisect(uint40(block.timestamp) - rateLimitSettings.time);
-      if (success) {
-        allowed += found.value;
-      }
+      uint216 currentValue = rateLimitCurrent.value;
+      (, , allowed) = history(uint40(block.timestamp) - rateLimitSettings.time);
+      allowed += rateLimitSettings.value;
       allowed -= currentValue;
+      if (requested < allowed) {
+        allowed = requested;
+      }
+      if (allowed != 0) {
+        if (rateLimitCurrent.time > 0 && rateLimitCurrent.time < block.timestamp) {
+          _history.push(Timestamped(rateLimitCurrent.time, currentValue));
+        }
+        rateLimitCurrent.time = uint40(block.timestamp);
+        rateLimitCurrent.value = currentValue + allowed;
+      }
     }
-    if (requested < allowed) {
-      allowed = requested;
-    }
-    (rateLimitCurrent.time, rateLimitCurrent.value) = (uint40(block.timestamp), currentValue + allowed);
   }
 }
