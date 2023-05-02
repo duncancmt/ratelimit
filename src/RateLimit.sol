@@ -23,7 +23,8 @@ library Bisect {
     // at/before the needle.
     unchecked {
       uint256 start;
-      uint256 stop;
+      uint256 lo;
+      uint256 hi;
       {
         uint256 length = haystack.length;
         assembly ("memory-safe") {
@@ -33,17 +34,15 @@ library Bisect {
         if (length == 0) {
           return (false, _deref(start - 1));
         }
-        stop = start + length;
+        uint256 stop = start + length;
+        (lo, hi) = (stop - 2, stop - 1);
       }
 
-      uint256 lo;
-      uint256 hi;
       // To avoid accessing extra state, we bias our search towards the end
       // of the list. This does not affect the asymptotic gas, but gives
       // better constants when "hotter" data is searched for.
-      (lo, hi) = (stop - 2, stop - 1);
       while (true) {
-        if (lo < start || lo > stop) { // TODO: condition `lo > stop` is probably unnecessary, given that `start` is a hash value
+        if (lo < start) {
           lo = start - 1;
           break;
         } else if (_deref(lo).time <= needle) {
@@ -63,7 +62,7 @@ library Bisect {
       }
       // lo == hi
 
-      if (lo < start || lo > stop) { // TODO: see above
+      if (lo < start) {
         return (false, _deref(start - 1));
       }
       return (true, _deref(lo));
