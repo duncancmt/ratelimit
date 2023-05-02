@@ -19,8 +19,8 @@ library Bisect {
     returns (bool, Timestamped storage)
   {
     // This is an awkward bisection search. In a normal bisection search, you
-    // want to find the last element at/after the needle. In this search you
-    // want to find the first element at/before the needle.
+    // want to find the first element after the needle. In this search we want
+    // at/before the needle.
     unchecked {
       uint256 start;
       uint256 stop;
